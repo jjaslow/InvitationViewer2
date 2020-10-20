@@ -89,14 +89,40 @@ public class ChooserManager : MonoBehaviour
 
     void AddToScreen(DownloadedDesign dd, int index)
     {
-        Sprite sp = Sprite.Create(dd.designImage, new Rect(0, 0, dd.designImage.width, dd.designImage.height), new Vector2(0.5f, 0.5f));
+        int designWidth = dd.designImage.width;
+        int designHeight = dd.designImage.height;
+
+        Sprite sp = Sprite.Create(dd.designImage, new Rect(0, 0, designWidth, designHeight), new Vector2(0.5f, 0.5f));
 
         GameObject b = GameObject.Instantiate(buttonPrefab, designFrame.transform);
         b.name = "Button Design: " + index;
         designButtons.Add(b);
 
         b.transform.GetChild(0).GetComponent<Text>().text = "Tap this design to see your\n" + dd.designType;
-        b.transform.GetChild(1).GetComponent<Image>().sprite = sp;
+        b.transform.GetChild(2).GetComponent<Image>().sprite = sp;
+
+        int defaultSize = (int)b.transform.GetChild(2).GetComponent<RectTransform>().rect.width;
+        int backgroundHeight, backgroundWidth;
+        if (designWidth<designHeight)
+        {
+            //tall
+            backgroundHeight = defaultSize;
+            backgroundWidth = designWidth * defaultSize / designHeight;
+        }
+        else if(designWidth == designHeight)
+        {
+            //same
+            backgroundHeight = defaultSize;
+            backgroundWidth = defaultSize;
+        }
+        else
+        {
+            //wide
+            backgroundWidth = defaultSize;
+            backgroundHeight = defaultSize * designHeight / designWidth;
+        }
+        b.transform.GetChild(1).GetComponent<Image>().GetComponent<RectTransform>().sizeDelta = new Vector2(backgroundWidth, backgroundHeight);
+
         b.GetComponent<Button>().onClick.AddListener(() => pressDesignButton(index));
 
         b.SetActive(false);
@@ -158,7 +184,7 @@ public class ChooserManager : MonoBehaviour
             designType = type
         };
 
-        Texture2D tex = null;
+        Texture2D tex;
 
         string path = Path.Combine(location, name);
         //TODO:: REMOVE THIS...   path = location + "/" + name;
@@ -222,15 +248,16 @@ public class ChooserManager : MonoBehaviour
         if (!canUpdate)
             return;
 
-        if(numberOfDesignsDownloaded>0)
+        nextButton.SetActive(false);
+
+        //TODO::  == S3Manager.Instance.designsToDownload
+        if (numberOfDesignsDownloaded == S3Manager.Instance.designsToDownload)        // >0
         {
             designButtons[designDisplayed].SetActive(true);
-        }
 
-        if (numberOfDesignsDownloaded > 1)
-            nextButton.SetActive(true);
-        else
-            nextButton.SetActive(false);
+            if (numberOfDesignsDownloaded > 1)
+                nextButton.SetActive(true);
+        }
     }
 
     public void PressNextDesignButton()

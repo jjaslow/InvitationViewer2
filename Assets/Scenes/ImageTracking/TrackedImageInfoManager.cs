@@ -32,6 +32,8 @@ public class TrackedImageInfoManager : MonoBehaviour
     [SerializeField]
     TestCameraImage testCameraImage;
 
+    [SerializeField]
+    GameObject instructionsText;
 
     const float INCHES_PER_METER = 39.37f;
     bool setPaperColor;
@@ -41,6 +43,7 @@ public class TrackedImageInfoManager : MonoBehaviour
     {
         setPaperColor = false;
         cam = Camera.main;
+        instructionsText.SetActive(true);
     }
 
     ARTrackedImageManager m_TrackedImageManager;
@@ -138,6 +141,8 @@ public class TrackedImageInfoManager : MonoBehaviour
             // Set the design texture
             var material2 = plane2GO.GetComponent<MeshRenderer>().material;
             material2.mainTexture =  ChooserManager.Instance.designs[ChooserManager.Instance.GetDesignDisplayed()].designImage;
+
+            instructionsText.SetActive(false);
         }
         else
         {
